@@ -1,0 +1,336 @@
+//**** INNER CLASSES ****
+1- Instantiating an Inner Class from Within the Outer Class
+
+class MyOuter {
+	private int x = 7;
+	
+	public void makeInner() {
+		MyInner in = new MyInner();
+		in.seeOuter();
+	}
+	
+	// inner class definition
+	class MyInner {
+		public void seeOuter() {
+			System.out.println("Outer x is " + x);
+		}
+	} // close inner class definition
+	
+} // close outer class
+
+-- How to test it?
+-- It also works if the main method is inside the 
+
+class TestMyOuter {
+	public static void main(String[] args) {
+		MyOuter out = new MyOuter();
+		out.makeInner();
+	}
+}
+
+2- Creating an Inner Class Object from "Outside" the Outer Class Instance Code
+
+class MyOuter {
+	private int x = 7;
+	
+	// inner class definition
+	class MyInner {
+		public void seeOuter() {
+			System.out.println("Outer x is " + x);
+		}
+	} // close inner class definition
+} // close outer class
+
+public class MyInnerTest {
+	public static void main(String[] args) {
+		MyOuter mo = new MyOuter();
+		MyOuter.MyInner inner = mo.new MyInner();
+		inner.seeOuter();
+		
+		// OR combine both lines into one
+		MyOuter.MyInner in = new MyOuter().new MyInner();
+		in.seeOuter();	
+	}
+}
+
+Note: the main method can be within the outer class:
+
+class MyOuter {
+	private int x = 7;
+	
+	// inner class definition
+	class MyInner {
+		public void seeOuter() {
+			System.out.println("Outer x is " + x);
+		}
+	} // close inner class definition
+	
+	public static void main(String[] args) {
+		MyOuter.MyInner in = new MyOuter().new MyInner();
+		in.seeOuter();	
+	}
+} // close outer class
+
+3- Referencing the Inner or Outer Instance from Within the Inner Class
+
+class MyOuter {
+	private int x = 7;
+
+	class MyInner {
+		public void seeOuter() {
+			System.out.println("Outer x is " + x);
+			System.out.println("Inner class ref is " + this);
+			System.out.println("Outer class ref is " + MyOuter.this);
+		}
+	}
+	
+	public static void main(String[] args) {
+		MyOuter.MyInner in = new MyOuter().new MyInner();
+		in.seeOuter();	
+	}
+}
+
+4- Regular Inner class vs Method-local Inner class
+
+- Regular Inner class
+
+class MyOuter2 {
+	private String x = "Outer2";
+	
+	class MyInner {
+		public void seeOuter() {
+			System.out.println("Outer x is " + x);
+	} // close inner class method
+}
+
+- Method-local Inner class
+
+class MyOuter2 {
+	private String x = "Outer2";
+	void doStuff() {
+		class MyInner {
+			public void seeOuter() {
+				System.out.println("Outer x is " + x);
+			} // close inner class method
+		} // close inner class definition
+	} // close outer class method doStuff()
+}
+
+5- How to instantiate and use a method-local inner class:
+
+To use the inner class, you must make an instance of it somewhere within the method but 
+below the inner class definition (or the compiler won't be able to find the inner class). 
+A method-local inner class can be instantiated only within the method where the
+inner class is defined.
+
+class MyOuter2 {
+	private String x = "Outer2";
+	
+	void doStuff() {
+		class MyInner {
+			public void seeOuter() {
+				System.out.println("Outer x is " + x);
+			} // close inner class method
+		} // close inner class definition
+		
+		MyInner mi = new MyInner();	// This line must come after the class
+		mi.seeOuter();	
+	} // close outer class method doStuff()
+} // close outer class
+
+public class TestMyOuter2 {
+	public static void main(String[] args) {
+		MyOuter2 outer = new MyOuter2();
+		outer.doStuff();
+	}
+}
+
+
+6- Plain-Old Anonymous Inner Classes, Flavor One
+Creates an instance of an anonymous inner class which is a subclass of Popcorn
+
+class Popcorn {
+	public void pop() {
+		System.out.println("popcorn");
+	}
+}
+
+class Food {
+	// Declare a reference variable, p, of type Popcorn. Then declare a new class that
+	// has no name but that is a subclass of Popcorn.
+	// In other words, the result is a Popcorn reference to a brand-new 
+	// instance of a brand-new, Just-In-Time, anonymous (no name) subclass of Popcorn
+	Popcorn p = new Popcorn() {
+		// Overriding the pop() method of the superclass Popcorn
+		public void pop() {
+			System.out.println("anonymous popcorn");
+		}
+	};
+}
+
+public class TestFood {
+	public static void main(String[] args) {
+		Food food = new Food();
+		food.p.pop();		
+	}
+}
+
+
+7- Plain-Old Anonymous Inner Classes, Flavor Two
+Creates an instance of an anonymous inner class, but this time, the new 
+Just-In-Time class is an implementer of the Cookable interface.
+
+interface Cookable {
+	public void cook();
+}
+
+class Food {
+	// Declare a reference variable of type Cookable that, obviously, will refer to an
+	// object from a class that implements the Cookable interface. But, we don't yet
+	// have a class that implements Cookable, so we're going to make one right here.
+	// In other words, it's creating an instance of a new anonymous implementer of Cookable
+	// and declares a reference variable of type Cookable that refers to that instance.
+	Cookable c = new Cookable() {
+		public void cook() {
+			System.out.println("anonymous cookable implementer");
+		}
+	};
+	
+	public static void main(String[] args) {
+		Food food = new Food();
+		food.c.cook();
+	}
+}
+
+
+8- Argument-Defined Anonymous Inner Classes
+In this example, the method doStuff in class Bar has an argument of type Foo
+But we don't have any class implementing Foo here
+
+class MyWonderfulClass {
+	void go() {
+		Bar b = new Bar();
+		
+		// To call doStuff, we need to pass an instance that implements Foo but we don't have one
+		// yet.  So we need to create a class that implements Foo and then we need to create an
+		// instance of it	
+		b.doStuff(new Foo() {
+			@Override
+			public void foof() {
+				System.out.println("foofy!");
+			}
+		});
+		
+		b.doStuff(f);
+	} // end go
+	
+	public static void main(String[] args) {
+		MyWonderfulClass c = new MyWonderfulClass();
+		c.go();
+	}
+	
+} // end class
+
+// Foo is a functional interface
+interface Foo {
+	void foof();
+}
+
+class Bar {
+	void doStuff(Foo f) { 
+		f.foof();
+	}
+}
+
+-----------
+-- Modified old-fashioned way to lambda
+
+class MyWonderfulClass {
+	void go() {
+		Bar b = new Bar();		
+		b.doStuff(() -> System.out.println("foofy!"));
+	} // end go
+	
+	public static void main(String[] args) {
+		MyWonderfulClass c = new MyWonderfulClass();
+		c.go();
+	}
+	
+} // end class
+
+// Foo is a functional interface
+interface Foo {
+	void foof();
+}
+
+class Bar {
+	void doStuff(Foo f) { 
+		f.foof();
+	}
+}
+
+-----------
+-- Another version
+
+class MyWonderfulClass {
+	void go() {
+		Bar b = new Bar();		
+		Foo f = () -> System.out.println("foofy!");
+		b.doStuff(f);
+	} // end go
+	
+	public static void main(String[] args) {
+		MyWonderfulClass c = new MyWonderfulClass();
+		c.go();
+	}
+	
+} // end class
+
+// Foo is a functional interface
+interface Foo {
+	void foof();
+}
+
+class Bar {
+	void doStuff(Foo f) { 
+		f.foof();
+	}
+}
+
+9- Static Nested Classes
+They really aren't inner classes at all. A static nested class is simply a class 
+that's a static member of the enclosing class.
+It is simply a non-inner (also called "top-level") class scoped within
+another. So with static classes, it's really more about name-space resolution than
+about an implicit relationship between the two classes.
+IMPORTANT NOTE: there is no such a thing as "static" class. The static modifier in 
+this case says that the nested class is a static member of the outer class.
+
+class BigOuter {
+	static class Nested { }
+}
+
+10- Instantiating a static nested class from nonenclosing class
+
+class Broom {
+	static class B2 {void goB2() { System.out.println("hi 2"); } }
+
+	public static void main(String[] args) {
+		B2 b2 = new B2();	// access the enclosed class
+		b2.goB2();
+	}
+}
+
+11- Instantiating a static nested class from the enclosing class
+
+class Broom {
+	public static void main(String[] args) {
+		BigOuter.Nest n = new BigOuter.Nest();	// both class names
+		n.go();
+	}
+}
+
+class BigOuter {
+	static class Nest {void go() { System.out.println("hi"); } }
+}
+
